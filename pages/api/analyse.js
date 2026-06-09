@@ -78,7 +78,17 @@ Focus entirely on protecting the tenant. Be direct, specific, and use plain Engl
     });
 
     const data = await response.json();
+
+    if (data.error) {
+      console.error('Anthropic API error:', data.error);
+      return res.status(500).json({ error: `AI error: ${data.error.message}` });
+    }
+
     const report = data.content?.[0]?.text || '';
+
+    if (!report) {
+      return res.status(500).json({ error: 'AI returned empty response' });
+    }
 
     return res.status(200).json({ report });
   } catch (error) {
