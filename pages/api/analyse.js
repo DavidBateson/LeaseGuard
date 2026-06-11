@@ -70,7 +70,7 @@ IRISH LAW FACTS — apply these precisely:
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5',
-        max_tokens: 2500,
+        max_tokens: 4000,
         system: SYSTEM_PROMPT,
         messages: [{ role: 'user', content: `Analyse this Irish lease:\n\n${leaseText}` }],
       }),
