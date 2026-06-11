@@ -71,7 +71,7 @@ Focus entirely on protecting the tenant. Be direct, specific, and use plain Engl
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5',
-max_tokens: 1000,
+max_tokens: 2500,
         system: SYSTEM_PROMPT,
         messages: [{ role: 'user', content: `Analyse this Irish lease:\n\n${leaseText}` }],
       }),
