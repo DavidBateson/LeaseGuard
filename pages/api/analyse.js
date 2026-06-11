@@ -28,12 +28,12 @@ Analyse the rental lease provided and produce a structured report EXACTLY in thi
 - Clauses that are normal and expected in Irish leases.
 - Keep this brief.
 
-⚖ IRISH LAW EXPLANATION:
+[LAW] IRISH LAW EXPLANATION:
 - Maximum 4 bullet points only.
 - One sentence per bullet point.
 - Plain English, no headers, no bold text.
 
-💡 WHAT YOU SHOULD DO:
+[TODO] WHAT YOU SHOULD DO:
 - Give clear, specific, actionable advice.
 - Use phrases like "Ask your landlord to remove clause X", "Clarify in writing that...", "Do not sign until..."
 
