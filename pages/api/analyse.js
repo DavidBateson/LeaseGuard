@@ -85,6 +85,7 @@ max_tokens: 1000,
     }
 
     const report = data.content?.[0]?.text || '';
+console.log('AI REPORT:', report.substring(0, 500));
 
     if (!report) {
       return res.status(500).json({ error: 'AI returned empty response' });
