@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 
-// ─── DEMO DATA (free, no API needed) ─────────────────────────────────────────
 const DEMO_SECTIONS = {
   critical: `- ILLEGAL DEPOSIT: "Deposit: €3,300 (two months)" — Under the Residential Tenancies Act 2004, the maximum deposit a landlord can charge is ONE month's rent (€1,650). Charging two months is illegal. You are owed €1,650 back before you even move in.
 - ILLEGAL NOTICE PERIOD: "The landlord may enter the property at any time with 12 hours notice" — Irish law requires a minimum of 24 hours written notice. This clause violates the Residential Tenancies Act and is unenforceable.
@@ -35,7 +34,6 @@ VERDICT: NEGOTIATE FIRST — This lease has serious illegal clauses that must be
 
 function parseReport(text) {
   const sections = { critical: "", unfair: "", standard: "", law: "", todo: "", score: "" };
-  
   const markers = [
     { key: "critical", patterns: ["🔴", "CRITICAL RISKS"] },
     { key: "unfair", patterns: ["🟡", "UNFAIR OR QUESTIONABLE", "UNFAIR CLAUSES"] },
@@ -44,11 +42,9 @@ function parseReport(text) {
     { key: "todo", patterns: ["[TODO]", "💡", "WHAT YOU SHOULD DO"] },
     { key: "score", patterns: ["📊", "RISK SCORE"] },
   ];
-
   const lines = text.split("\n");
   let currentKey = null;
   let content = [];
-
   lines.forEach(line => {
     const upper = line.toUpperCase();
     let matched = false;
@@ -63,11 +59,9 @@ function parseReport(text) {
     }
     if (!matched && currentKey) content.push(line);
   });
-
   if (currentKey) sections[currentKey] = content.join("\n").trim();
   return sections;
 }
-
 
 function extractVerdict(scoreText) {
   if (scoreText.includes("WALK AWAY")) return { label: "WALK AWAY", color: "#ef4444", icon: "🚫" };
@@ -85,10 +79,6 @@ function getFirstBulletTruncated(text) {
   return cut.substring(0, cut.lastIndexOf(" ")) + "...";
 }
 
-function generateReportId() {
-  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-}
-
 export default function LeaseGuard() {
   const [screen, setScreen] = useState("home");
   const [leaseText, setLeaseText] = useState("");
@@ -101,16 +91,13 @@ export default function LeaseGuard() {
   const [loadingStep, setLoadingStep] = useState(0);
   const [reportId, setReportId] = useState(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
-  const [shareMsg, setShareMsg] = useState("");
 
   const loadingSteps = ["Reading your lease...", "Checking Irish rental law...", "Scanning for RTB violations...", "Calculating risk score...", "Writing your report..."];
 
-  // Check for payment success on load
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const rId = params.get("reportId");
     const payment = params.get("payment");
-
     if (rId && payment === "success") {
       const saved = sessionStorage.getItem(`report_${rId}`);
       if (saved) {
@@ -141,7 +128,6 @@ export default function LeaseGuard() {
     setUnlocked(false);
     setLoadingStep(0);
     const interval = setInterval(() => setLoadingStep(s => Math.min(s + 1, loadingSteps.length - 1)), 1500);
-
     try {
       const res = await fetch("/api/analyse", {
         method: "POST",
@@ -150,9 +136,8 @@ export default function LeaseGuard() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Analysis failed");
-
       const parsed = parseReport(data.report);
-      const id = generateReportId();
+      const id = data.reportId;
       sessionStorage.setItem(`report_${id}`, JSON.stringify(parsed));
       setSections(parsed);
       setReportId(id);
@@ -186,15 +171,6 @@ export default function LeaseGuard() {
     setPaymentLoading(false);
   };
 
-  const handleShare = () => {
-    if (!reportId) return;
-    const url = `${window.location.origin}/?reportId=${reportId}&payment=success`;
-    navigator.clipboard.writeText(url).then(() => {
-      setShareMsg("Link copied!");
-      setTimeout(() => setShareMsg(""), 2000);
-    });
-  };
-
   return (
     <div style={s.root}>
       <div style={s.glowTop} />
@@ -206,7 +182,6 @@ export default function LeaseGuard() {
           </div>
           <div style={s.headerTag}>Irish Rental Law AI</div>
         </div>
-
         {screen === "home" && <HomeScreen onStart={() => setScreen("input")} onDemo={loadDemo} />}
         {screen === "input" && (
           <InputScreen leaseText={leaseText} setLeaseText={setLeaseText}
@@ -217,7 +192,6 @@ export default function LeaseGuard() {
           <ResultsScreen sections={sections} isDemo={isDemo} unlocked={unlocked}
             activeTab={activeTab} setActiveTab={setActiveTab}
             onUnlock={handleUnlock} paymentLoading={paymentLoading}
-            onShare={handleShare} shareMsg={shareMsg}
             onReset={() => { setSections(null); setLeaseText(""); setUnlocked(false); setIsDemo(false); setReportId(null); setScreen("home"); }} />
         )}
       </div>
@@ -294,7 +268,7 @@ function LoadingScreen({ step, steps }) {
   );
 }
 
-function ResultsScreen({ sections, isDemo, unlocked, activeTab, setActiveTab, onUnlock, paymentLoading, onShare, shareMsg, onReset }) {
+function ResultsScreen({ sections, isDemo, unlocked, activeTab, setActiveTab, onUnlock, paymentLoading, onReset }) {
   const verdict = extractVerdict(sections.score);
   const tabs = [
     { id: "critical", label: "🔴 Critical Risks" },
@@ -304,7 +278,6 @@ function ResultsScreen({ sections, isDemo, unlocked, activeTab, setActiveTab, on
     { id: "todo", label: "💡 What To Do" },
     { id: "score", label: "📊 Risk Score" },
   ];
-
   return (
     <div style={s.resultsScreen}>
       {isDemo && (
@@ -318,11 +291,6 @@ function ResultsScreen({ sections, isDemo, unlocked, activeTab, setActiveTab, on
           <div style={{ ...s.verdictLabel, color: verdict.color }}>{verdict.label}</div>
           <div style={s.verdictSub}>Based on Irish rental law analysis</div>
         </div>
-        {unlocked && !isDemo && (
-          <button style={s.shareBtn} onClick={onShare}>
-            {shareMsg || "🔗 Share"}
-          </button>
-        )}
       </div>
       <div style={s.tabsWrap}>
         <div style={s.tabs}>
@@ -427,7 +395,6 @@ function ReportSection({ text }) {
   );
 }
 
-
 const s = {
   root: { minHeight: "100vh", background: "#0c0e12", fontFamily: "Georgia, serif", position: "relative", overflowX: "hidden" },
   glowTop: { position: "fixed", top: -150, left: "50%", transform: "translateX(-50%)", width: 700, height: 400, borderRadius: "50%", pointerEvents: "none", background: "radial-gradient(ellipse, rgba(234,179,8,0.07) 0%, transparent 70%)", zIndex: 0 },
@@ -473,7 +440,6 @@ const s = {
   verdictIcon: { fontSize: 36 },
   verdictLabel: { fontSize: 20, fontWeight: 800, letterSpacing: "-0.5px" },
   verdictSub: { fontSize: 12, color: "#6b7280", marginTop: 2 },
-  shareBtn: { background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 8, padding: "6px 14px", color: "#d1d5db", fontSize: 12, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" },
   tabsWrap: { overflowX: "auto" },
   tabs: { display: "flex", gap: 2, borderBottom: "1px solid rgba(255,255,255,0.07)", minWidth: "max-content" },
   tab: { background: "none", border: "none", borderBottom: "2px solid transparent", color: "#6b7280", fontSize: 12, fontWeight: 600, padding: "10px 14px", cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 5 },
