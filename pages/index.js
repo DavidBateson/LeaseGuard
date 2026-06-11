@@ -117,6 +117,7 @@ export default function LeaseGuard() {
         const parsed = JSON.parse(saved);
         setSections(parsed);
         setReportId(rId);
+        sessionStorage.clear();
         setUnlocked(true);
         setScreen("results");
       }
