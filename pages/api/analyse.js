@@ -1,5 +1,7 @@
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 import { randomUUID } from 'crypto';
+
+const redis = Redis.fromEnv();
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -92,9 +94,8 @@ IRISH LAW FACTS — apply these precisely:
       return res.status(500).json({ error: 'AI returned empty response' });
     }
 
-    // Save report to KV with 24hr expiry
     const reportId = randomUUID();
-    await kv.set(`report:${reportId}`, report, { ex: 86400 });
+    await redis.set(`report:${reportId}`, report, { ex: 86400 });
 
     return res.status(200).json({ report, reportId });
   } catch (error) {
