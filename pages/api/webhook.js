@@ -26,23 +26,23 @@ function formatReportAsHtml(reportText) {
   for (const line of lines) {
     const t = line.trim();
     if (t.startsWith('🔴')) {
-      html += `<h2 style="color:#ef4444;margin-top:24px;">🔴 Critical Risks</h2>`;
+      html += `<h2 style="color:#ef4444;margin-top:24px;font-family:sans-serif;">🔴 Critical Risks</h2>`;
     } else if (t.startsWith('🟡')) {
-      html += `<h2 style="color:#eab308;margin-top:24px;">🟡 Unfair Clauses</h2>`;
+      html += `<h2 style="color:#eab308;margin-top:24px;font-family:sans-serif;">🟡 Unfair Clauses</h2>`;
     } else if (t.startsWith('🟢')) {
-      html += `<h2 style="color:#22c55e;margin-top:24px;">🟢 Standard Terms</h2>`;
+      html += `<h2 style="color:#22c55e;margin-top:24px;font-family:sans-serif;">🟢 Standard Terms</h2>`;
     } else if (t.startsWith('[LAW]')) {
-      html += `<h2 style="color:#60a5fa;margin-top:24px;">⚖️ Irish Law</h2>`;
+      html += `<h2 style="color:#60a5fa;margin-top:24px;font-family:sans-serif;">⚖️ Irish Law Explanation</h2>`;
     } else if (t.startsWith('[TODO]')) {
-      html += `<h2 style="color:#a78bfa;margin-top:24px;">✅ What To Do</h2>`;
+      html += `<h2 style="color:#a78bfa;margin-top:24px;font-family:sans-serif;">✅ What You Should Do</h2>`;
     } else if (t.startsWith('📊')) {
-      html += `<h2 style="color:#f5f0e8;margin-top:24px;">📊 Risk Score</h2>`;
+      html += `<h2 style="color:#f5f0e8;margin-top:24px;font-family:sans-serif;">📊 Risk Score</h2>`;
     } else if (t.startsWith('VERDICT:')) {
-      html += `<p style="background:#1a1d24;border-left:4px solid #eab308;padding:12px 16px;margin-top:16px;border-radius:4px;color:#eab308;font-weight:bold;">${t}</p>`;
+      html += `<p style="background:#1a1d24;border-left:4px solid #eab308;padding:12px 16px;margin-top:16px;border-radius:4px;color:#eab308;font-weight:bold;font-family:sans-serif;">${t}</p>`;
     } else if (t.startsWith('•') || t.startsWith('-')) {
-      html += `<p style="margin:6px 0;padding-left:16px;color:#d1d5db;">${t}</p>`;
+      html += `<p style="margin:6px 0;padding-left:16px;color:#d1d5db;line-height:1.6;">${t}</p>`;
     } else if (t.length > 0) {
-      html += `<p style="margin:6px 0;color:#d1d5db;">${t}</p>`;
+      html += `<p style="margin:6px 0;color:#d1d5db;line-height:1.6;">${t}</p>`;
     }
   }
 
@@ -65,60 +65,82 @@ export default async function handler(req, res) {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
-    console.error('Webhook signature verification failed:', err.message);
+    console.error('Stripe Webhook signature validation failed:', err.message);
     return res.status(400).json({ error: `Webhook Error: ${err.message}` });
   }
+
+  console.log(`Processing valid Stripe webhook event: ${event.type}`);
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const reportId = session.metadata?.reportId;
     const customerEmail = session.customer_details?.email;
 
+    console.log(`Payment confirmed! Report ID: ${reportId}, Customer: ${customerEmail}`);
+
     if (customerEmail && reportId) {
       let reportText = null;
       try {
         reportText = await redis.get(`report:${reportId}`);
       } catch (kvError) {
-        console.error('Redis retrieval failed:', kvError);
+        console.error('Upstash Redis retrieval runtime error:', kvError);
       }
 
-      if (reportText && process.env.RESEND_API_KEY) {
-        const reportHtml = formatReportAsHtml(reportText);
+      if (!reportText) {
+        console.error(`Critical error: Could not find report text in Redis matching ID: ${reportId}`);
+        return res.status(500).json({ error: 'Cached data missing' });
+      }
 
-        try {
-          await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              from: 'LeaseGuard <reports@leaseguard.ie>',
-              to: customerEmail,
-              subject: 'Your LeaseGuard Report',
-              html: `
-                <div style="font-family:Georgia,serif;max-width:640px;margin:0 auto;background:#0c0e12;color:#f5f0e8;padding:40px;border-radius:12px;">
-                  <div style="margin-bottom:32px;">
-                    <span style="font-size:24px;">🛡️</span>
-                    <span style="font-size:22px;font-weight:bold;margin-left:10px;">LeaseGuard</span>
-                  </div>
-                  <h1 style="color:#eab308;font-size:20px;margin-bottom:8px;">Your Full Lease Analysis</h1>
-                  <p style="color:#9ca3af;margin-bottom:32px;">Here is your complete Irish lease report.</p>
-                  <div style="background:#13161e;border-radius:8px;padding:24px;">
-                    ${reportHtml}
-                  </div>
-                  <p style="color:#4b5563;font-size:12px;margin-top:32px;border-top:1px solid rgba(255,255,255,0.06);padding-top:16px;">
-                    LeaseGuard provides general information only, not legal advice. For advice specific to your situation, consult a qualified solicitor.<br><br>
-                    RTB: <a href="https://rtb.ie" style="color:#eab308;">rtb.ie</a> · Threshold: <a href="https://threshold.ie" style="color:#eab308;">threshold.ie</a>
-                  </p>
+      if (!process.env.RESEND_API_KEY) {
+        console.error('Critical deployment error: RESEND_API_KEY is missing from environment variables.');
+        return res.status(500).json({ error: 'Email configuration missing' });
+      }
+
+      const reportHtml = formatReportAsHtml(reportText);
+
+      try {
+        console.log('Dispatching request to Resend secure mail API...');
+        const resendResponse = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: 'LeaseGuard <reports@leaseguard.ie>',
+            to: customerEmail,
+            subject: 'Your LeaseGuard Report',
+            html: `
+              <div style="font-family:Georgia,serif;max-width:640px;margin:0 auto;background:#0c0e12;color:#f5f0e8;padding:40px;border-radius:12px;">
+                <div style="margin-bottom:32px;">
+                  <span style="font-size:24px;">🛡️</span>
+                  <span style="font-size:22px;font-weight:bold;margin-left:10px;">LeaseGuard</span>
                 </div>
-              `,
-            }),
-          });
-        } catch (emailError) {
-          console.error('Email sending failed:', emailError);
+                <h1 style="color:#eab308;font-size:20px;margin-bottom:8px;">Your Full Lease Analysis</h1>
+                <p style="color:#9ca3af;margin-bottom:32px;">Here is your complete Irish lease report.</p>
+                <div style="background:#13161e;border-radius:8px;padding:24px;">
+                  ${reportHtml}
+                </div>
+                <p style="color:#4b5563;font-size:12px;margin-top:32px;border-top:1px solid rgba(255,255,255,0.06);padding-top:16px;">
+                  LeaseGuard provides general information only, not legal advice. For advice specific to your situation, consult a qualified solicitor.<br><br>
+                  RTB: <a href="https://rtb.ie" style="color:#eab308;">rtb.ie</a> · Threshold: <a href="https://threshold.ie" style="color:#eab308;">threshold.ie</a>
+                </p>
+              </div>
+            `,
+          }),
+        });
+
+        if (!resendResponse.ok) {
+          const resendErrorPayload = await resendResponse.text();
+          console.error(`Resend API rejected delivery. Server payload response: ${resendErrorPayload}`);
+        } else {
+          console.log(`Email successfully pushed to outgoing queue for ${customerEmail}!`);
         }
+      } catch (emailError) {
+        console.error('Network execution failure connection to Resend service:', emailError);
       }
+    } else {
+      console.error('Webhook missing crucial metadata fields inside payment payload object.');
     }
   }
 
