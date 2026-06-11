@@ -393,7 +393,11 @@ function FullPaywall({ onUnlock, paymentLoading, sectionName }) {
 
 function ReportSection({ text }) {
   if (!text) return <p style={{ color: "#6b7280", fontSize: 14 }}>No content in this section.</p>;
-  const lines = text.split("\n").filter(l => l.trim());
+  const clean = text.replace(/\*\*(.*?)\*\*/g, "$1").replace(/\*(.*?)\*/g, "$1");
+  const lines = clean.split("\n").filter(l => {
+    const t = l.trim();
+    return t && t !== "-" && t !== "•";
+  });
   return (
     <div style={s.reportSection}>
       {lines.map((line, i) => {
@@ -411,6 +415,7 @@ function ReportSection({ text }) {
     </div>
   );
 }
+
 
 const s = {
   root: { minHeight: "100vh", background: "#0c0e12", fontFamily: "Georgia, serif", position: "relative", overflowX: "hidden" },
