@@ -39,8 +39,8 @@ function parseReport(text) {
     { key: "critical", emoji: "🔴" },
     { key: "unfair", emoji: "🟡" },
     { key: "standard", emoji: "🟢" },
-    { key: "law", emoji: "⚖️" },
-    { key: "todo", emoji: "💡" },
+{ key: "law", emoji: "[LAW]" },
+{ key: "todo", emoji: "[TODO]" },
     { key: "score", emoji: "📊" },
   ];
 
