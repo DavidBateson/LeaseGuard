@@ -66,6 +66,7 @@ IRISH LAW FACTS — apply these precisely:
 - UK tenancy law does not apply in Ireland. Ignore any UK legal concepts.`;
 
   try {
+    // Standard model configuration for Anthropic API
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -74,7 +75,7 @@ IRISH LAW FACTS — apply these precisely:
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5',
+        model: 'claude-3-5-haiku-20241022',
         max_tokens: 4000,
         system: SYSTEM_PROMPT,
         messages: [{ role: 'user', content: `Analyse this Irish lease:\n\n${leaseText}` }],
@@ -84,22 +85,26 @@ IRISH LAW FACTS — apply these precisely:
     const data = await response.json();
 
     if (data.error) {
-      console.error('Anthropic API error:', data.error);
+      console.error('Anthropic API error details:', data.error);
       return res.status(500).json({ error: `AI error: ${data.error.message}` });
     }
 
     const report = data.content?.[0]?.text || '';
 
     if (!report) {
-      return res.status(500).json({ error: 'AI returned empty response' });
+      return res.status(500).json({ error: 'AI returned an empty response' });
     }
 
+    // Generate a unique token for this report
     const reportId = randomUUID();
+    
+    // Save to temporary Upstash database so webhook can read it post-payment
     await redis.set(`report:${reportId}`, report, { ex: 86400 });
+    console.log(`Successfully cached report under ID: ${reportId}`);
 
     return res.status(200).json({ report, reportId });
   } catch (error) {
-    console.error('Anthropic error:', error);
+    console.error('Full breakdown of Anthropic analysis failure:', error);
     return res.status(500).json({ error: 'AI analysis failed. Please try again.' });
   }
 }
