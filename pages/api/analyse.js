@@ -29,8 +29,9 @@ Analyse the rental lease provided and produce a structured report EXACTLY in thi
 - Keep this brief.
 
 [LAW] IRISH LAW EXPLANATION:
-- Maximum 4 bullet points only.
-- One sentence per bullet point.
+- Use bullet points only, one point per law.
+- Maximum 5 bullet points.
+- One sentence per bullet.
 - Plain English, no headers, no bold text.
 
 [TODO] WHAT YOU SHOULD DO:
