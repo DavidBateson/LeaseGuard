@@ -26,7 +26,7 @@ export default async function handler(req, res) {
               name: 'LeaseGuard Full Report',
               description: 'Complete Irish lease analysis with all risks, Irish law explanations, and negotiation scripts.',
             },
-            unit_amount: 499,
+            unit_amount: 799,
           },
           quantity: 1,
         },
