@@ -28,10 +28,10 @@ Analyse the rental lease provided and produce a structured report EXACTLY in thi
 - Clauses that are normal and expected in Irish leases.
 - Keep this brief.
 
-⚖️ IRISH LAW EXPLANATION:
-- Explain the most relevant Irish rental laws that apply to THIS specific lease.
-- Cover: RTB guidelines, deposit rules, notice periods, RPZ zones if relevant.
-- Plain English only — write like you're explaining to an 18-year-old renter.
+⚖ IRISH LAW EXPLANATION:
+- Maximum 4 bullet points only.
+- One sentence per bullet point.
+- Plain English, no headers, no bold text.
 
 💡 WHAT YOU SHOULD DO:
 - Give clear, specific, actionable advice.
