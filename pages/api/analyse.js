@@ -1,3 +1,6 @@
+import { kv } from '@vercel/kv';
+import { randomUUID } from 'crypto';
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -89,7 +92,11 @@ IRISH LAW FACTS — apply these precisely:
       return res.status(500).json({ error: 'AI returned empty response' });
     }
 
-    return res.status(200).json({ report });
+    // Save report to KV with 24hr expiry
+    const reportId = randomUUID();
+    await kv.set(`report:${reportId}`, report, { ex: 86400 });
+
+    return res.status(200).json({ report, reportId });
   } catch (error) {
     console.error('Anthropic error:', error);
     return res.status(500).json({ error: 'AI analysis failed. Please try again.' });
