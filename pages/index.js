@@ -407,7 +407,7 @@ function ReportSection({ text }) {
   const clean = text.replace(/\*\*(.*?)\*\*/g, "$1").replace(/\*(.*?)\*/g, "$1");
   const lines = clean.split("\n").filter(l => {
     const t = l.trim();
-    return t && t !== "-" && t !== "•" && t !== "--" && t.length > 2;
+    return t && t !== "-" && t !== "•" && t !== "--" && t !== "---" && t.length > 2;
   });
   return (
     <div style={s.reportSection}>
