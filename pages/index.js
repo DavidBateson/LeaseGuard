@@ -35,23 +35,29 @@ VERDICT: NEGOTIATE FIRST — This lease has serious illegal clauses that must be
 
 function parseReport(text) {
   const sections = { critical: "", unfair: "", standard: "", law: "", todo: "", score: "" };
-  const patterns = [
-    { key: "critical", start: "🔴 CRITICAL RISKS:", end: "🟡" },
-    { key: "unfair", start: "🟡 UNFAIR OR QUESTIONABLE CLAUSES:", end: "🟢" },
-    { key: "standard", start: "🟢 STANDARD TERMS:", end: "⚖️" },
-    { key: "law", start: "⚖️ IRISH LAW EXPLANATION:", end: "💡" },
-    { key: "todo", start: "💡 WHAT YOU SHOULD DO:", end: "📊" },
-    { key: "score", start: "📊 RISK SCORE:", end: "---" },
+  const markers = [
+    { key: "critical", emoji: "🔴" },
+    { key: "unfair", emoji: "🟡" },
+    { key: "standard", emoji: "🟢" },
+    { key: "law", emoji: "⚖️" },
+    { key: "todo", emoji: "💡" },
+    { key: "score", emoji: "📊" },
   ];
-  patterns.forEach(({ key, start, end }) => {
-    const startIdx = text.indexOf(start);
+
+  markers.forEach(({ key }, i) => {
+    const startEmoji = markers[i].emoji;
+    const endEmoji = markers[i + 1]?.emoji || null;
+    const startIdx = text.indexOf(startEmoji);
     if (startIdx === -1) return;
-    const contentStart = startIdx + start.length;
-    const endIdx = end ? text.indexOf(end, contentStart) : text.length;
-    sections[key] = text.slice(contentStart, endIdx === -1 ? undefined : endIdx).trim();
+    const lineEnd = text.indexOf("\n", startIdx);
+    const contentStart = lineEnd === -1 ? startIdx + 2 : lineEnd + 1;
+    const endIdx = endEmoji ? text.indexOf(endEmoji, contentStart) : text.length;
+    sections[key] = text.slice(contentStart, endIdx === -1 ? text.length : endIdx).trim();
   });
+
   return sections;
 }
+
 
 function extractVerdict(scoreText) {
   if (scoreText.includes("WALK AWAY")) return { label: "WALK AWAY", color: "#ef4444", icon: "🚫" };
