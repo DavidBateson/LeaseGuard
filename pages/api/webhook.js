@@ -1,7 +1,8 @@
 import Stripe from 'stripe';
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const redis = Redis.fromEnv();
 
 export const config = {
   api: {
@@ -74,12 +75,11 @@ export default async function handler(req, res) {
     const customerEmail = session.customer_details?.email;
 
     if (customerEmail && reportId) {
-      // Retrieve report from KV
       let reportText = null;
       try {
-        reportText = await kv.get(`report:${reportId}`);
+        reportText = await redis.get(`report:${reportId}`);
       } catch (kvError) {
-        console.error('KV retrieval failed:', kvError);
+        console.error('Redis retrieval failed:', kvError);
       }
 
       if (reportText && process.env.RESEND_API_KEY) {
