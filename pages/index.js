@@ -373,7 +373,7 @@ function CriticalPreview({ text, onUnlock, paymentLoading }) {
         <h3 style={s.paywallTitle}>Full report locked</h3>
         <p style={s.paywallSub}>Unlock all critical risks, unfair clauses, Irish law explanations, and word-for-word negotiation scripts for your specific lease.</p>
         <button style={s.unlockBtn} onClick={onUnlock} disabled={paymentLoading}>
-          {paymentLoading ? "Loading..." : "Unlock Full Report — €4.99"}
+          {paymentLoading ? "Loading..." : "Unlock Full Report — €7.99"}
         </button>
         <p style={s.paywallNote}>One-time payment · Instant access · No subscription</p>
       </div>
@@ -394,7 +394,7 @@ function FullPaywall({ onUnlock, paymentLoading, sectionName }) {
         <h3 style={s.paywallTitle}>{sectionName} is locked</h3>
         <p style={s.paywallSub}>Unlock your full LeaseGuard report — all findings, Irish law references, action steps, and negotiation scripts.</p>
         <button style={s.unlockBtn} onClick={onUnlock} disabled={paymentLoading}>
-          {paymentLoading ? "Loading..." : "Unlock Full Report — €4.99"}
+          {paymentLoading ? "Loading..." : "Unlock Full Report — €7.99"}
         </button>
         <p style={s.paywallNote}>One-time payment · Instant access · No subscription</p>
       </div>
