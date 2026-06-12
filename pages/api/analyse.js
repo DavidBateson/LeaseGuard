@@ -87,7 +87,7 @@ IRISH LAW FACTS (Apply only if standard tenancy, NOT a Digs/Licensee arrangement
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5',
-        max_tokens: 4000,
+        max_tokens: 5000,
         system: SYSTEM_PROMPT,
         messages: [{ role: 'user', content: `Analyse this Irish lease:\n\n${leaseText}` }],
       }),
