@@ -315,8 +315,13 @@ function ResultsScreen({ sections, isDemo, unlocked, activeTab, setActiveTab, on
         )}
       </div>
       <button style={s.resetBtn} onClick={onReset}>← Analyse another lease</button>
-      <p style={s.disclaimer}>⚖️ LeaseGuard provides general information only, not legal advice. Consult a solicitor for advice specific to your situation. RTB: rtb.ie · Threshold: threshold.ie</p>
-    </div>
+      <p style={s.disclaimer}>⚖️ LeaseGuard provides general information only, not legal advice... RTB: rtb.ie · Threshold: threshold.ie</p>
+
+<div style={{ marginTop: '10px', display: 'flex', gap: '15px', justifyContent: 'center', fontSize: '0.8rem' }}>
+  <a href="/privacy-policy" style={{ color: '#0066cc', textDecoration: 'underline' }}>Privacy Policy</a>
+  <a href="/disclaimer" style={{ color: '#0066cc', textDecoration: 'underline' }}>Legal Disclaimer</a>
+</div>
+
   );
 }
 
