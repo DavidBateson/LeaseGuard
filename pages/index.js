@@ -13,7 +13,6 @@ const DEMO_SECTIONS = {
 // 2. Utility Functions
 export function parseReport(text) {
   if (!text) return { critical: "", unfair: "", standard: "", law: "", todo: "", score: "" };
-  
   const sections = { critical: "", unfair: "", standard: "", law: "", todo: "", score: "" };
   const markers = [
     { key: "critical", patterns: ["🔴", "CRITICAL", "RISK"] },
@@ -42,7 +41,6 @@ export function parseReport(text) {
     }
     if (!matched) content.push(line);
   });
-  
   if (currentKey) sections[currentKey] = content.join("\n").trim();
   return sections;
 }
@@ -67,7 +65,7 @@ export function getFirstBulletTruncated(text) {
 export default function LeaseGuard() {
   const [screen, setScreen] = useState("home"); 
   const [leaseText, setLeaseText] = useState("");
-  const [sections, setSections] = useState(DEMO_SECTIONS);
+  const [sections, setSections] = useState(null);
   const [isDemo, setIsDemo] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -82,12 +80,10 @@ export default function LeaseGuard() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
-      
-      if (params.get("success") === "true" || params.get("payment") === "success") {
+      if (params.get("success") === "true") {
         setUnlocked(true);
         setScreen("results");
       }
-
       const rId = params.get("reportId");
       if (rId) {
         setReportId(rId);
@@ -105,7 +101,6 @@ export default function LeaseGuard() {
     setLoading(true);
     setError(null);
     setLoadingStep(0);
-
     const interval = setInterval(() => {
       setLoadingStep(prev => (prev < loadingSteps.length - 1 ? prev + 1 : prev));
     }, 1200);
@@ -113,7 +108,6 @@ export default function LeaseGuard() {
     try {
       const generatedId = "rep_" + Math.random().toString(36).substring(2, 9);
       await new Promise(resolve => setTimeout(resolve, 3600));
-      
       sessionStorage.setItem(`lease_report_${generatedId}`, leaseText);
       setReportId(generatedId);
       setSections(parseReport(leaseText));
@@ -131,7 +125,7 @@ export default function LeaseGuard() {
   const loadDemo = () => {
     setSections(DEMO_SECTIONS);
     setIsDemo(true);
-    setUnlocked(true); 
+    setUnlocked(false); 
     setScreen("results");
   };
 
@@ -155,6 +149,14 @@ export default function LeaseGuard() {
     }
   };
 
+  const onReset = () => {
+    setScreen("home");
+    setLeaseText("");
+    setSections(null);
+    setIsDemo(false);
+    setUnlocked(false);
+  };
+
   const tabs = [
     { id: "critical", label: "Critical Risks" },
     { id: "unfair", label: "Unfair Clauses" },
@@ -169,7 +171,6 @@ export default function LeaseGuard() {
         <>
           <h1 style={s.title}>LeaseGuard</h1>
           <p style={s.subtitle}>Instant Irish Rental Agreement Compliance Checks</p>
-          
           {loading ? (
             <div style={s.loadingWrap}>
               <div style={s.spinner}></div>
@@ -205,49 +206,41 @@ export default function LeaseGuard() {
 
           <div style={s.tabsWrap}>
             <div style={s.tabs}>
-              {tabs.map(t => {
-                const isActive = activeTab === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => setActiveTab(t.id)}
-                    style={{
-                      ...s.tab,
-                      color: isActive ? "#e5a93c" : "#8a8a93",
-                      borderBottomColor: isActive ? "#e5a93c" : "transparent"
-                    }}
-                  >
-                    {t.label}
-                    {!unlocked && t.id !== "critical" && <span style={s.lockIcon}>🔒</span>}
-                  </button>
-                );
-              })}
+              {tabs.map(t => (
+                <button
+                  key={t.id}
+                  onClick={() => setActiveTab(t.id)}
+                  style={{ ...s.tab, ...(activeTab === t.id ? s.tabActive : {}) }}
+                >
+                  {t.label}
+                  {!unlocked && t.id !== "critical" && <span style={s.lockIcon}>🔒</span>}
+                </button>
+              ))}
             </div>
           </div>
 
           <div style={s.tabContent}>
             {activeTab === "critical" && (
               unlocked
-                ? <ReportSection text={sections?.critical || "No critical issues detected."} />
-                : <CriticalPreview text={sections?.critical || ""} onUnlock={onUnlock} paymentLoading={paymentLoading} />
+                ? <ReportSection text={sections.critical || "No critical issues detected."} />
+                : <CriticalPreview text={sections.critical || ""} onUnlock={onUnlock} paymentLoading={paymentLoading} />
             )}
             {activeTab !== "critical" && (
               unlocked
-                ? <ReportSection text={sections?.[activeTab] || "No records items found."} />
+                ? <ReportSection text={sections[activeTab] || "No records items found."} />
                 : <FullPaywall onUnlock={onUnlock} paymentLoading={paymentLoading} sectionName={tabs.find(t => t.id === activeTab)?.label} />
             )}
           </div>
 
-          <button style={s.resetBtn} onClick={() => setScreen("home")}>
+          <button style={s.resetBtn} onClick={onReset}>
             ← Analyse another lease
           </button>
-          
           <p style={s.disclaimer}>
             ⚖️ LeaseGuard provides general information only, not legal advice. RTB: rtb.ie · Threshold: threshold.ie
           </p>
-          <div style={s.footerLinks}>
-            <a href="/privacy-policy" style={s.fLink}>Privacy Policy</a>
-            <a href="/disclaimer" style={s.fLink}>Legal Disclaimer</a>
+          <div style={{ marginTop: '10px', display: 'flex', gap: '15px', justifyContent: 'center' }}>
+            <a href="/privacy-policy" style={{ color: '#0066cc', textDecoration: 'underline' }}>Privacy Policy</a>
+            <a href="/disclaimer" style={{ color: '#0066cc', textDecoration: 'underline' }}>Legal Disclaimer</a>
           </div>
         </>
       )}
@@ -297,7 +290,7 @@ function FullPaywall({ onUnlock, paymentLoading, sectionName }) {
   );
 }
 
-// 6. Original Line-By-Line Expanded Stylesheet
+// 4. Stylesheet
 const s = {
   container: {
     background: "#131316",
@@ -418,16 +411,17 @@ const s = {
     padding: "10px 12px",
     fontSize: "13px",
     fontWeight: "600",
+    color: "#8a8a93",
     cursor: "pointer",
-    transition: "all 0.2s",
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "4px",
-    whiteSpace: "nowrap"
+    transition: "all 0.2s"
+  },
+  tabActive: {
+    color: "#e5a93c",
+    borderBottomColor: "#e5a93c"
   },
   lockIcon: {
     fontSize: "11px",
-    marginLeft: "2px"
+    marginLeft: "4px"
   },
   tabContent: {
     minHeight: "180px",
@@ -517,15 +511,5 @@ const s = {
     lineHeight: "1.5",
     marginTop: "24px",
     marginBottom: "12px"
-  },
-  footerLinks: {
-    display: "flex",
-    justifyContent: "center",
-    gap: "16px"
-  },
-  fLink: {
-    color: "#3b82f6",
-    fontSize: "12px",
-    textDecoration: "none"
   }
 };
