@@ -458,4 +458,19 @@ const s = {
   normalLine: { fontSize: 14, color: "#9ca3af", lineHeight: 1.65, padding: "2px 0" },
   verdictLine: { fontSize: 15, fontWeight: 700, color: "#eab308", padding: "10px 0 4px" },
   criticalPreviewWrap: { position: "relative" },
-  criticalFirstItem: { display:
+  criticalFirstItem: { display: "flex", gap: 10, alignItems: "flex-start", opacity: 0.5 },
+  criticalFadeWrap: { position: "relative", width: "100%", overflow: "hidden" },
+  criticalFade: { position: "absolute", bottom: 0, left: 0, right: 0, height: "100%", background: "linear-gradient(to bottom, transparent, #0c0e12)", pointerEvents: "none" },
+  blurRows: { display: "flex", flexDirection: "column", gap: 10, marginTop: 16, filter: "blur(4px)", opacity: 0.25, pointerEvents: "none", userSelect: "none" },
+  blurRow: { height: 12, background: "rgba(255,255,255,0.1)", borderRadius: 4 },
+  paywallOverlay: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "linear-gradient(to bottom, rgba(12,14,18,0.8), #0c0e12)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "40px 20px", borderRadius: 14, border: "1px solid rgba(255,255,255,0.05)" },
+  paywallLock: { fontSize: 32, marginBottom: 12 },
+  paywallTitle: { margin: "0 0 8px", fontSize: 20, fontWeight: 700, color: "#f5f0e8" },
+  paywallSub: { margin: "0 0 20px", fontSize: 14, color: "#9ca3af", lineHeight: 1.5, maxWidth: 440 },
+  unlockBtn: { background: "#eab308", color: "#0c0e12", border: "none", borderRadius: 12, padding: "14px 28px", fontSize: 15, fontWeight: 800, cursor: "pointer", fontFamily: "inherit", width: "100%", maxWidth: 320 },
+  paywallNote: { margin: "10px 0 0", fontSize: 11, color: "#4b5563" },
+  fullPaywallWrap: { position: "relative", minHeight: 240 },
+  blurRowsFull: { display: "flex", flexDirection: "column", gap: 10, filter: "blur(5px)", opacity: 0.2, pointerEvents: "none", userSelect: "none" },
+  resetBtn: { background: "none", border: "1px solid rgba(255,255,255,0.15)", color: "#9ca3af", borderRadius: 10, padding: "10px 18px", fontSize: 13, cursor: "pointer", fontFamily: "inherit", alignSelf: "flex-start", marginTop: 10 },
+  disclaimer: { fontSize: 12, color: "#4b5563", lineHeight: 1.6, margin: "20px 0 10px", textAlign: "center" }
+};
