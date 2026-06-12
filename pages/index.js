@@ -302,7 +302,7 @@ function ResultsScreen({ sections, isDemo, unlocked, activeTab, setActiveTab, on
           ))}
         </div>
       </div>
-      <div style={s.tabContent}>
+            <div style={s.tabContent}>
         {activeTab === "critical" && (
           unlocked
             ? <ReportSection text={sections.critical} />
@@ -326,16 +326,8 @@ function ResultsScreen({ sections, isDemo, unlocked, activeTab, setActiveTab, on
 }
 
 function CriticalPreview({ text, onUnlock, paymentLoading }) {
-  const truncated = getFirstBulletTruncated(text);
   return (
     <div style={s.criticalPreviewWrap}>
-      <div style={s.criticalFirstItem}>
-        <span style={s.bulletDot}>—</span>
-        <div style={s.criticalFadeWrap}>
-          <span style={s.bulletText}>{truncated}</span>
-          <div style={s.criticalFade} />
-        </div>
-      </div>
       <div style={s.blurRows}>
         {[100, 85, 92, 75, 88, 70].map((w, i) => (
           <div key={i} style={{ ...s.blurRow, width: `${w}%` }} />
@@ -374,6 +366,7 @@ function FullPaywall({ onUnlock, paymentLoading, sectionName }) {
     </div>
   );
 }
+
 
 function ReportSection({ text }) {
   if (!text) return <p style={{ color: "#6b7280", fontSize: 14 }}>No content in this section.</p>;
