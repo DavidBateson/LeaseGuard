@@ -32,6 +32,7 @@ export default async function handler(req, res) {
         },
       ],
       mode: 'payment',
+      allow_promotion_codes: true, // <-- This enables your promo codes on checkout
       success_url: `${baseUrl}/?reportId=${reportId}&payment=success`,
       cancel_url: `${baseUrl}/?reportId=${reportId}&payment=cancelled`,
       metadata: {
