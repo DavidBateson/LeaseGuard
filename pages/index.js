@@ -315,16 +315,15 @@ function ResultsScreen({ sections, isDemo, unlocked, activeTab, setActiveTab, on
         )}
       </div>
       <button style={s.resetBtn} onClick={onReset}>← Analyse another lease</button>
-      <p style={s.disclaimer}>⚖️ LeaseGuard provides general information only, not legal advice... RTB: rtb.ie · Threshold: threshold.ie</p>
+      <p style={s.disclaimer}>⚖️ LeaseGuard provides general information only, not legal advice. RTB: rtb.ie · Threshold: threshold.ie</p>
 
-<div style={{ marginTop: '10px', display: 'flex', gap: '15px', justifyContent: 'center', fontSize: '0.8rem' }}>
-  <a href="/privacy-policy" style={{ color: '#0066cc', textDecoration: 'underline' }}>Privacy Policy</a>
-  <a href="/disclaimer" style={{ color: '#0066cc', textDecoration: 'underline' }}>Legal Disclaimer</a>
-</div>
-</div>
-);
+      <div style={{ marginTop: '10px', display: 'flex', gap: '15px', justifyContent: 'center', fontSize: '0.8rem' }}>
+        <a href="/privacy-policy" style={{ color: '#0066cc', textDecoration: 'underline' }}>Privacy Policy</a>
+        <a href="/disclaimer" style={{ color: '#0066cc', textDecoration: 'underline' }}>Legal Disclaimer</a>
+      </div>
+    </div>
+  );
 }
-
 
 function CriticalPreview({ text, onUnlock, paymentLoading }) {
   const truncated = getFirstBulletTruncated(text);
@@ -459,19 +458,4 @@ const s = {
   normalLine: { fontSize: 14, color: "#9ca3af", lineHeight: 1.65, padding: "2px 0" },
   verdictLine: { fontSize: 15, fontWeight: 700, color: "#eab308", padding: "10px 0 4px" },
   criticalPreviewWrap: { position: "relative" },
-  criticalFirstItem: { display: "flex", gap: 10, alignItems: "flex-start", padding: "8px 0" },
-  criticalFadeWrap: { position: "relative", overflow: "hidden", maxHeight: 48 },
-  criticalFade: { position: "absolute", bottom: 0, left: 0, right: 0, height: 32, background: "linear-gradient(to bottom, rgba(12,14,18,0), rgba(12,14,18,1))" },
-  blurRows: { display: "flex", flexDirection: "column", gap: 10, padding: "12px 0", filter: "blur(5px)", opacity: 0.2, pointerEvents: "none" },
-  blurRow: { height: 13, background: "rgba(255,255,255,0.18)", borderRadius: 6 },
-  paywallOverlay: { display: "flex", flexDirection: "column", alignItems: "center", gap: 10, textAlign: "center", padding: "24px 20px 20px" },
-  fullPaywallWrap: { position: "relative" },
-  blurRowsFull: { display: "flex", flexDirection: "column", gap: 10, padding: "20px 0", filter: "blur(6px)", opacity: 0.2, pointerEvents: "none" },
-  paywallLock: { fontSize: 32 },
-  paywallTitle: { margin: 0, fontSize: 17, fontWeight: 700, color: "#f5f0e8" },
-  paywallSub: { margin: 0, fontSize: 13, color: "#9ca3af", lineHeight: 1.6, maxWidth: 340 },
-  unlockBtn: { background: "#eab308", color: "#0c0e12", border: "none", borderRadius: 12, padding: "13px 26px", fontSize: 15, fontWeight: 800, cursor: "pointer", fontFamily: "inherit" },
-  paywallNote: { margin: 0, fontSize: 11, color: "#4b5563" },
-  resetBtn: { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "12px 20px", color: "#6b7280", fontSize: 13, cursor: "pointer", fontFamily: "inherit", alignSelf: "flex-start" },
-  disclaimer: { fontSize: 11, color: "#374151", lineHeight: 1.6, textAlign: "center" },
-};
+  criticalFirstItem: { display:
