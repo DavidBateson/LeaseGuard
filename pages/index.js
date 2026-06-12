@@ -85,10 +85,12 @@ export default function LeaseGuard() {
         setScreen("results");
       }
       const rId = params.get("reportId");
-      if (rId) {
+      const payment = params.get("payment");
+      if (rId && payment === "success") {
         setReportId(rId);
         const saved = sessionStorage.getItem(`lease_report_${rId}`);
         if (saved) {
+          // Fixed directly here: removed the broken JSON.parse logic entirely
           setSections(parseReport(saved));
           setScreen("results");
         }
@@ -168,32 +170,61 @@ export default function LeaseGuard() {
   return (
     <div style={s.container}>
       {screen === "home" ? (
-        <>
-          <h1 style={s.title}>LeaseGuard</h1>
-          <p style={s.subtitle}>Instant Irish Rental Agreement Compliance Checks</p>
-          {loading ? (
-            <div style={s.loadingWrap}>
-              <div style={s.spinner}></div>
-              <p style={s.loadingText}>{loadingSteps[loadingStep]}</p>
+        <div style={s.heroWrapper}>
+          <div style={s.headerNav}>
+            <div style={s.logoBlock}>
+              <span style={s.logoShield}>🛡️</span>
+              <span style={s.logoText}>LeaseGuard</span>
             </div>
-          ) : (
-            <>
-              <textarea
-                style={s.textarea}
-                placeholder="Paste your Irish tenancy lease agreement clauses here to run the audit..."
-                value={leaseText}
-                onChange={e => setLeaseText(e.target.value)}
-              />
-              <button style={s.mainBtn} onClick={handleAnalyze} disabled={!leaseText.trim()}>
-                Audit Lease Agreement
-              </button>
-              <button style={s.demoBtn} onClick={loadDemo}>
-                View Sample Report Layout
-              </button>
-              {error && <p style={s.error}>{error}</p>}
-            </>
-          )}
-        </>
+            <div style={s.lawBadge}>IRISH RENTAL LAW AI</div>
+          </div>
+
+          <div style={s.heroSection}>
+            <div style={s.taglineBadge}>🇮🇪 Built for Irish Renters</div>
+            <h1 style={s.mainHeading}>Know exactly what you're signing.</h1>
+            <p style={s.mainParagraph}>
+              Paste your lease. Get a full legal analysis based on Irish rental law — in plain English. Catch illegal clauses before they cost you thousands.
+            </p>
+          </div>
+
+          <div style={s.appCard}>
+            {loading ? (
+              <div style={s.loadingWrap}>
+                <div style={s.spinner}></div>
+                <p style={s.loadingText}>{loadingSteps[loadingStep]}</p>
+              </div>
+            ) : (
+              <>
+                <textarea
+                  style={s.textarea}
+                  placeholder="Paste your Irish tenancy lease agreement clauses here to run the audit..."
+                  value={leaseText}
+                  onChange={e => setLeaseText(e.target.value)}
+                />
+                <button style={s.mainBtn} onClick={handleAnalyze} disabled={!leaseText.trim()}>
+                  Analyse my lease →
+                </button>
+                <button style={s.demoBtn} onClick={loadDemo}>
+                  See example report
+                </button>
+                {error && <p style={s.error}>{error}</p>}
+              </>
+            )}
+          </div>
+
+          <div style={s.featuresGrid}>
+            <div style={s.featureCard}>
+              <span style={s.featIcon}>🔴</span>
+              <h3 style={s.featTitle}>Critical Risks</h3>
+              <p style={s.featText}>Illegal clauses flagged with Irish law references</p>
+            </div>
+            <div style={s.featureCard}>
+              <span style={s.featIcon}>⚖️</span>
+              <h3 style={s.featTitle}>Irish Law</h3>
+              <p style={s.featText}>RTB rules, deposit limits, notice periods explained</p>
+            </div>
+          </div>
+        </div>
       ) : (
         <>
           <div style={{ ...s.verdictBanner, borderColor: verdict.color }}>
@@ -238,9 +269,9 @@ export default function LeaseGuard() {
           <p style={s.disclaimer}>
             ⚖️ LeaseGuard provides general information only, not legal advice. RTB: rtb.ie · Threshold: threshold.ie
           </p>
-          <div style={{ marginTop: '10px', display: 'flex', gap: '15px', justifyContent: 'center' }}>
-            <a href="/privacy-policy" style={{ color: '#0066cc', textDecoration: 'underline' }}>Privacy Policy</a>
-            <a href="/disclaimer" style={{ color: '#0066cc', textDecoration: 'underline' }}>Legal Disclaimer</a>
+          <div style={s.footerLinks}>
+            <a href="/privacy-policy" style={s.fLink}>Privacy Policy</a>
+            <a href="/disclaimer" style={s.fLink}>Legal Disclaimer</a>
           </div>
         </>
       )}
@@ -293,30 +324,91 @@ function FullPaywall({ onUnlock, paymentLoading, sectionName }) {
 // 4. Stylesheet
 const s = {
   container: {
-    background: "#131316",
+    background: "#0a0a0c",
     minHeight: "100vh",
     padding: "24px 16px",
     fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
-    boxSizing: "border-box"
+    boxSizing: "border-box",
+    color: "#fff"
   },
-  title: {
-    fontSize: "28px",
-    fontWeight: "800",
+  heroWrapper: {
+    maxWidth: "480px",
+    margin: "0 auto",
+    display: "flex",
+    flexDirection: "column",
+    gap: "24px"
+  },
+  headerNav: {
+    display: "flex",
+    justifyContent: "between",
+    alignItems: "center",
+    width: "100%",
+    padding: "8px 0"
+  },
+  logoBlock: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px"
+  },
+  logoShield: {
+    fontSize: "18px"
+  },
+  logoText: {
+    fontSize: "19px",
+    fontWeight: "700",
     color: "#fff",
-    textAlign: "center",
-    margin: "40px 0 6px 0",
     letterSpacing: "-0.5px"
   },
-  subtitle: {
-    fontSize: "14px",
-    color: "#8a8a93",
-    textAlign: "center",
-    margin: "0 0 32px 0"
+  lawBadge: {
+    background: "rgba(229,169,60,0.08)",
+    border: "1px solid #e5a93c",
+    color: "#e5a93c",
+    fontSize: "10px",
+    fontWeight: "700",
+    padding: "4px 10px",
+    borderRadius: "20px",
+    letterSpacing: "0.5px"
+  },
+  heroSection: {
+    textAlign: "left",
+    marginTop: "12px"
+  },
+  taglineBadge: {
+    display: "inline-block",
+    background: "rgba(34,197,94,0.1)",
+    border: "1px solid rgba(34,197,94,0.25)",
+    color: "#4ade80",
+    fontSize: "12px",
+    fontWeight: "600",
+    padding: "4px 12px",
+    borderRadius: "20px",
+    marginBottom: "16px"
+  },
+  mainHeading: {
+    fontSize: "32px",
+    fontWeight: "800",
+    lineHeight: "1.15",
+    color: "#fff",
+    margin: "0 0 14px 0",
+    letterSpacing: "-1px"
+  },
+  mainParagraph: {
+    fontSize: "15px",
+    color: "#a1a1aa",
+    lineHeight: "1.5",
+    margin: "0"
+  },
+  appCard: {
+    background: "#121215",
+    border: "1px solid #222227",
+    borderRadius: "16px",
+    padding: "20px",
+    boxShadow: "0 4px 30px rgba(0, 0, 0, 0.4)"
   },
   textarea: {
     width: "100%",
-    height: "180px",
-    background: "#1c1c21",
+    height: "160px",
+    background: "#18181c",
     border: "1px solid #2e2e38",
     borderRadius: "12px",
     padding: "14px",
@@ -324,7 +416,8 @@ const s = {
     fontSize: "15px",
     resize: "none",
     outline: "none",
-    boxSizing: "border-box"
+    boxSizing: "border-box",
+    lineHeight: "1.4"
   },
   mainBtn: {
     width: "100%",
@@ -333,22 +426,52 @@ const s = {
     border: "none",
     borderRadius: "12px",
     padding: "14px",
-    fontSize: "16px",
+    fontSize: "15px",
     fontWeight: "700",
-    marginTop: "20px",
-    cursor: "pointer"
+    marginTop: "16px",
+    cursor: "pointer",
+    transition: "background 0.2s"
   },
   demoBtn: {
     width: "100%",
-    background: "transparent",
-    color: "#8a8a93",
+    background: "#1c1c24",
+    color: "#e4e4e7",
     border: "1px solid #2e2e38",
     borderRadius: "12px",
     padding: "12px",
     fontSize: "14px",
-    fontWeight: "500",
-    marginTop: "12px",
+    fontWeight: "600",
+    marginTop: "10px",
     cursor: "pointer"
+  },
+  featuresGrid: {
+    display: "flex",
+    gap: "12px",
+    marginTop: "8px"
+  },
+  featureCard: {
+    flex: 1,
+    background: "#121215",
+    border: "1px solid #1e1e24",
+    borderRadius: "14px",
+    padding: "16px"
+  },
+  featIcon: {
+    fontSize: "18px",
+    display: "block",
+    marginBottom: "10px"
+  },
+  featTitle: {
+    fontSize: "14px",
+    fontWeight: "700",
+    color: "#fff",
+    margin: "0 0 6px 0"
+  },
+  featText: {
+    fontSize: "12px",
+    color: "#71717a",
+    margin: "0",
+    lineHeight: "1.4"
   },
   loadingWrap: {
     padding: "40px 0",
@@ -412,8 +535,7 @@ const s = {
     fontSize: "13px",
     fontWeight: "600",
     color: "#8a8a93",
-    cursor: "pointer",
-    transition: "all 0.2s"
+    cursor: "pointer"
   },
   tabActive: {
     color: "#e5a93c",
@@ -511,6 +633,16 @@ const s = {
     lineHeight: "1.5",
     marginTop: "24px",
     marginBottom: "12px"
+  },
+  footerLinks: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "15px",
+    marginTop: "10px"
+  },
+  fLink: {
+    color: "#3b82f6",
+    fontSize: "12px",
+    textDecoration: "underline"
   }
 };
-
