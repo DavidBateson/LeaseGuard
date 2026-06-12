@@ -2,19 +2,13 @@ import { useState, useEffect } from "react";
 
 // 1. Static Demo Data for fallback previews
 const DEMO_SECTIONS = {
-  critical: `- ILLEGAL DEPOSIT: "Deposit: €4,200" requested alongside first month rent.
-- ILLEGAL NOTICE PERIOD: "The landlord may terminate this agreement with 14 days notice."
-- UNFAIR TERMINATION: "The landlord reserves the right to evict for minor noise complaints."`,
-  unfair: `- EXCESSIVE REPAIR LIABILITY: "The tenant is responsible for boiler repairs."
-- RPZ VIOLATION RISK: "Rent may be reviewed every 6 months at sole discretion."
-- WEATHER DAMAGE LIABILITY: "The tenant is liable for structural freeze leaks."`,
-  standard: `- No sub-letting clause — standard residential lease terms apply.
-- Contents insurance requirement — normal amount required.
-- No pets clause — enforceable under common Irish tenancy templates.`,
+  critical: `🔴 ILLEGAL DEPOSIT: "Deposit: €4,200" requested alongside first month rent. Under the Residential Tenancies Act, upfront payments are legally capped at 2 months combined.
+🔴 ILLEGAL NOTICE PERIOD: "The landlord may terminate this agreement with 14 days notice." This violates statutory notice periods.`,
+  unfair: `🟡 EXCESSIVE REPAIR LIABILITY: "The tenant is responsible for boiler repairs." Structural maintenance belongs entirely to the landlord.
+🟡 RPZ VIOLATION RISK: "Rent may be reviewed every 6 months at sole discretion." Rent reviews inside Rent Pressure Zones are capped and restricted.`,
+  standard: `🟢 SUBLETTING CONDITION: The Tenant shall use the property solely as a private residential dwelling and shall not sublet without the prior written consent of the Landlord.`,
   law: `DEPOSIT: Under the Residential Tenancies Act, upfront payments are legally capped at 2 months combined.`,
-  todo: `- Do NOT pay a two-month deposit upfront.
-- Ask the landlord in writing to remove the €500 repair liability.
-- Ensure rent increases conform to RPZ calculators.`,
+  todo: `- Do NOT pay a two-month deposit upfront.\n- Ask the landlord in writing to remove the boiler repair liability.`,
   score: `Overall: 7.5/10 risk profile`
 };
 
@@ -92,7 +86,6 @@ export default function LeaseGuard() {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       
-      // Auto-unlock trigger condition checked instantly
       if (params.get("success") === "true" || params.get("payment") === "success") {
         setUnlocked(true);
         setScreen("results");
@@ -122,14 +115,13 @@ export default function LeaseGuard() {
 
     try {
       const generatedId = "rep_" + Math.random().toString(36).substring(2, 9);
-      // Simulate backend processing response delay safely
       await new Promise(resolve => setTimeout(resolve, 3600));
       
       sessionStorage.setItem(`lease_report_${generatedId}`, leaseText);
       setReportId(generatedId);
       setSections(parseReport(leaseText));
       setIsDemo(false);
-      setUnlocked(false);
+      setUnlocked(false); // Real audits are locked initially
       setScreen("results");
     } catch (err) {
       setError("Analysis encountered an unexpected timeout error. Please try again.");
@@ -142,7 +134,7 @@ export default function LeaseGuard() {
   const loadDemo = () => {
     setSections(DEMO_SECTIONS);
     setIsDemo(true);
-    setUnlocked(false);
+    setUnlocked(true); // FIX: Sample layout is completely UNLOCKED so users can preview!
     setScreen("results");
   };
 
@@ -176,95 +168,97 @@ export default function LeaseGuard() {
 
   return (
     <div style={s.container}>
-      {screen === "home" ? (
-        <div style={s.card}>
-          <h1 style={s.title}>LeaseGuard</h1>
-          <p style={s.subtitle}>Instant Irish Rental Agreement Compliance Checks</p>
-          
-          {loading ? (
-            <div style={s.loadingWrap}>
-              <div style={s.spinner}></div>
-              <p style={s.loadingText}>{loadingSteps[loadingStep]}</p>
-            </div>
-          ) : (
-            <>
-              <textarea
-                style={s.textarea}
-                placeholder="Paste your Irish tenancy lease agreement clauses here to run the audit..."
-                value={leaseText}
-                onChange={e => setLeaseText(e.target.value)}
-              />
-              <button style={s.mainBtn} onClick={handleAnalyze} disabled={!leaseText.trim()}>
-                Audit Lease Agreement
-              </button>
-              <button style={s.demoBtn} onClick={loadDemo}>
-                View Sample Report Layout
-              </button>
-              {error && <p style={s.error}>{error}</p>}
-            </>
-          )}
-        </div>
-      ) : (
-        <div style={s.card}>
-          {/* Verdict Banner Section */}
-          <div style={{ ...s.verdictBanner, borderColor: verdict.color }}>
-            <span style={{ ...s.verdictIcon, color: verdict.color }}>🚫</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ ...s.verdictLabel, color: verdict.color }}>{verdict.label}</div>
-              <div style={s.verdictSub}>Based on Irish rental law analysis</div>
-            </div>
-          </div>
-
-          {/* Navigation Tabs Area with clean single-line mobile rule overrides */}
-          <div style={s.tabsWrap}>
-            <div style={s.tabs}>
-              {tabs.map(t => {
-                const isActive = activeTab === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => setActiveTab(t.id)}
-                    style={{
-                      ...s.tab,
-                      color: isActive ? "#e5a93c" : "#888",
-                      borderBottomColor: isActive ? "#e5a93c" : "transparent"
-                    }}
-                  >
-                    {t.label}
-                    {!unlocked && t.id !== "critical" && <span style={s.lockIcon}>🔒</span>}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Fully Protected Dynamic Tab Panels with Optional Chaining */}
-          <div style={s.tabContent}>
-            {activeTab === "critical" && (
-              unlocked
-                ? <ReportSection text={sections?.critical || "No critical issues detected."} />
-                : <CriticalPreview text={sections?.critical || ""} onUnlock={onUnlock} paymentLoading={paymentLoading} />
+      <div style={s.wrapper}>
+        {screen === "home" ? (
+          <>
+            <h1 style={s.title}>LeaseGuard</h1>
+            <p style={s.subtitle}>Instant Irish Rental Agreement Compliance Checks</p>
+            
+            {loading ? (
+              <div style={s.loadingWrap}>
+                <div style={s.spinner}></div>
+                <p style={s.loadingText}>{loadingSteps[loadingStep]}</p>
+              </div>
+            ) : (
+              <>
+                <textarea
+                  style={s.textarea}
+                  placeholder="Paste your Irish tenancy lease agreement clauses here to run the audit..."
+                  value={leaseText}
+                  onChange={e => setLeaseText(e.target.value)}
+                />
+                <button style={s.mainBtn} onClick={handleAnalyze} disabled={!leaseText.trim()}>
+                  Audit Lease Agreement
+                </button>
+                <button style={s.demoBtn} onClick={loadDemo}>
+                  View Sample Report Layout
+                </button>
+                {error && <p style={s.error}>{error}</p>}
+              </>
             )}
-            {activeTab !== "critical" && (
-              unlocked
-                ? <ReportSection text={sections?.[activeTab] || "No records items found."} />
-                : <FullPaywall onUnlock={onUnlock} paymentLoading={paymentLoading} sectionName={tabs.find(t => t.id === activeTab)?.label} />
-            )}
-          </div>
+          </>
+        ) : (
+          <>
+            {/* Verdict Banner Section */}
+            <div style={{ ...s.verdictBanner, borderColor: verdict.color }}>
+              <span style={{ ...s.verdictIcon, color: verdict.color }}>🚫</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ ...s.verdictLabel, color: verdict.color }}>{verdict.label}</div>
+                <div style={s.verdictSub}>Based on Irish rental law analysis</div>
+              </div>
+            </div>
 
-          <button style={s.resetBtn} onClick={() => setScreen("home")}>
-            ← Analyse another lease
-          </button>
-          
-          <p style={s.disclaimer}>
-            ⚖️ LeaseGuard provides general information only, not legal advice. RTB: rtb.ie · Threshold: threshold.ie
-          </p>
-          <div style={s.footerLinks}>
-            <a href="/privacy-policy" style={s.fLink}>Privacy Policy</a>
-            <a href="/disclaimer" style={s.fLink}>Legal Disclaimer</a>
-          </div>
-        </div>
-      )}
+            {/* Navigation Tabs Area */}
+            <div style={s.tabsWrap}>
+              <div style={s.tabs}>
+                {tabs.map(t => {
+                  const isActive = activeTab === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => setActiveTab(t.id)}
+                      style={{
+                        ...s.tab,
+                        color: isActive ? "#e5a93c" : "#8a8a93",
+                        borderBottomColor: isActive ? "#e5a93c" : "transparent"
+                      }}
+                    >
+                      {t.label}
+                      {!unlocked && t.id !== "critical" && <span style={s.lockIcon}>🔒</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Dynamic Tab Panels */}
+            <div style={s.tabContent}>
+              {activeTab === "critical" && (
+                unlocked
+                  ? <ReportSection text={sections?.critical || "No critical issues detected."} />
+                  : <CriticalPreview text={sections?.critical || ""} onUnlock={onUnlock} paymentLoading={paymentLoading} />
+              )}
+              {activeTab !== "critical" && (
+                unlocked
+                  ? <ReportSection text={sections?.[activeTab] || "No records items found."} />
+                  : <FullPaywall onUnlock={onUnlock} paymentLoading={paymentLoading} sectionName={tabs.find(t => t.id === activeTab)?.label} />
+              )}
+            </div>
+
+            <button style={s.resetBtn} onClick={() => setScreen("home")}>
+              ← Analyse another lease
+            </button>
+            
+            <p style={s.disclaimer}>
+              ⚖️ LeaseGuard provides general information only, not legal advice. RTB: rtb.ie · Threshold: threshold.ie
+            </p>
+            <div style={s.footerLinks}>
+              <a href="/privacy-policy" style={s.fLink}>Privacy Policy</a>
+              <a href="/disclaimer" style={s.fLink}>Legal Disclaimer</a>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -312,17 +306,17 @@ function FullPaywall({ onUnlock, paymentLoading, sectionName }) {
   );
 }
 
-// 6. Complete Premium Dark Theme Stylesheet
+// 6. Restored Full-Screen Dark Stylesheet
 const s = {
-  container: { background: "#0b0b0c", minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center", padding: "16px", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" },
-  card: { background: "#131316", width: "100%", maxWidth: "460px", borderRadius: "16px", padding: "24px", boxShadow: "0 8px 32px rgba(0,0,0,0.4)", border: "1px solid #222226" },
-  title: { fontSize: "28px", fontWeight: "800", color: "#fff", textAlign: "center", margin: "0 0 4px 0", letterSpacing: "-0.5px" },
-  subtitle: { fontSize: "14px", color: "#8a8a93", textAlign: "center", margin: "0 0 24px 0" },
-  textarea: { width: "100%", height: "160px", background: "#1c1c21", border: "1px solid #2e2e38", borderRadius: "12px", padding: "14px", color: "#fff", fontSize: "15px", resize: "none", outline: "none", boxSizing: "border-box" },
-  mainBtn: { width: "100%", background: "#e5a93c", color: "#000", border: "none", borderRadius: "12px", padding: "14px", fontSize: "16px", fontWeight: "700", marginTop: "16px", cursor: "pointer" },
-  demoBtn: { width: "100%", background: "transparent", color: "#8a8a93", border: "1px solid #2e2e38", borderRadius: "12px", padding: "12px", fontSize: "14px", fontWeight: "500", marginTop: "10px", cursor: "pointer" },
+  container: { background: "#131316", minHeight: "100vh", display: "flex", justifyContent: "center", padding: "24px 16px", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", boxSizing: "border-box" },
+  wrapper: { width: "100%", maxWidth: "460px", display: "flex", flexDirection: "column" },
+  title: { fontSize: "28px", fontWeight: "800", color: "#fff", textAlign: "center", margin: "40px 0 6px 0", letterSpacing: "-0.5px" },
+  subtitle: { fontSize: "14px", color: "#8a8a93", textAlign: "center", margin: "0 0 32px 0" },
+  textarea: { width: "100%", height: "180px", background: "#1c1c21", border: "1px solid #2e2e38", borderRadius: "12px", padding: "14px", color: "#fff", fontSize: "15px", resize: "none", outline: "none", boxSizing: "border-box" },
+  mainBtn: { width: "100%", background: "#e5a93c", color: "#000", border: "none", borderRadius: "12px", padding: "14px", fontSize: "16px", fontWeight: "700", marginTop: "20px", cursor: "pointer" },
+  demoBtn: { width: "100%", background: "transparent", color: "#8a8a93", border: "1px solid #2e2e38", borderRadius: "12px", padding: "12px", fontSize: "14px", fontWeight: "500", marginTop: "12px", cursor: "pointer" },
   loadingWrap: { padding: "40px 0", textAlign: "center" },
-  spinner: { width: "28px", height: "28px", border: "3px solid #2e2e38", borderTopColor: "#e5a93c", borderRadius: "50%", margin: "0 auto 12px auto", animation: "spin 1s linear infinite" },
+  spinner: { width: "28px", height: "28px", border: "3px solid #2e2e38", borderTopColor: "#e5a93c", borderRadius: "50%", margin: "0 auto 12px auto" },
   loadingText: { color: "#fff", fontSize: "15px" },
   error: { color: "#ff4d4d", fontSize: "13px", marginTop: "12px", textAlign: "center" },
   verdictBanner: { display: "flex", alignItems: "center", background: "rgba(255,77,77,0.06)", border: "1px solid", borderRadius: "12px", padding: "14px", marginBottom: "20px" },
