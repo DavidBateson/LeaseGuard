@@ -307,15 +307,15 @@ function ResultsScreen({ sections, isDemo, unlocked, activeTab, setActiveTab, on
           ))}
         </div>
       </div>
-            <div style={s.tabContent}>
+      <div style={s.tabContent}>
         {activeTab === "critical" && (
           unlocked
-            ? <ReportSection text={sections.critical} />
-            : <CriticalPreview text={sections.critical} onUnlock={onUnlock} paymentLoading={paymentLoading} />
+            ? <ReportSection text={sections?.critical || ""} />
+            : <CriticalPreview text={sections?.critical || ""} onUnlock={onUnlock} paymentLoading={paymentLoading} />
         )}
         {activeTab !== "critical" && (
           unlocked
-            ? <ReportSection text={sections[activeTab]} />
+            ? <ReportSection text={sections?.[activeTab] || ""} />
             : <FullPaywall onUnlock={onUnlock} paymentLoading={paymentLoading} sectionName={tabs.find(t => t.id === activeTab)?.label} />
         )}
       </div>
