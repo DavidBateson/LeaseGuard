@@ -94,12 +94,17 @@ export default function LeaseGuard() {
 
   const loadingSteps = ["Reading your lease...", "Checking Irish rental law...", "Scanning for RTB violations...", "Calculating risk score...", "Writing your report..."];
 
-  useEffect(() => {
+    useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    
+    if (params.get("success") === "true") {
+      setUnlocked(true);
+    }
+
     const rId = params.get("reportId");
     const payment = params.get("payment");
     if (rId && payment === "success") {
-      const saved = sessionStorage.getItem(`report_${rId}`);
+
       if (saved) {
         const parsed = JSON.parse(saved);
         setSections(parsed);
