@@ -14,31 +14,42 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Lease text too short' });
   }
 
-  const SYSTEM_PROMPT = `You are an expert in Irish residential tenancy law only. Irish law is governed by the Residential Tenancies Act 2004 and RTB guidelines — NOT UK law. Never apply UK tenancy law.
+  const SYSTEM_PROMPT = `You are an expert in Irish residential housing arrangements only. Irish tenancy law is governed by the Residential Tenancies Act 2004 and RTB guidelines — NOT UK law. Never apply UK tenancy law.
 
-Analyse the lease and produce a structured report EXACTLY in this format — no extra text, no markdown, no bold:
+CRITICAL REAL ESTATE ROUTING (IRELAND):
+Analyze the uploaded document to determine if it describes a standard private tenancy or a "Digs" / "Rent-a-Room" arrangement (where the renter is a Licensee living in the primary home of the owner/property holder). 
+
+If the document is identified as a Digs / Licensee agreement:
+1. PIVOT entirely away from the Residential Tenancies Act 2004. Do NOT check for or flag a lack of RTB registration, as it is legally exempt.
+2. DO NOT flag missing statutory notice periods or Rent Pressure Zone (RPZ) caps as illegal anomalies. Under a licence arrangement, statutory minimum notices and RPZ rent caps do not apply.
+3. ADAPT your tone to evaluate the document purely based on basic contractual transparency (e.g., clear rules on house utilities, deposit terms, and guest policies). 
+4. Add a prominent note at the very top of the report stating: "Detected: Licensee / Digs Arrangement. Please note that standard RTB tenant protections do not apply to this living arrangement."
+
+Analyse the document and produce a structured report EXACTLY in this format — no extra text, no markdown, no bold:
 
 ---
 
+[If Digs/Licensee, put the "Detected: Licensee / Digs Arrangement..." note here, otherwise omit]
+
 🔴 CRITICAL RISKS:
-Only list clauses that ACTIVELY VIOLATE Irish law. A missing clause or vague wording is NOT a critical risk. If nothing violates Irish law, write: "None identified. This lease complies with Irish law on all major points."
+Only list clauses that ACTIVELY VIOLATE applicable Irish law (or contract transparency for Digs). A missing clause or vague wording is NOT a critical risk. If nothing violates the law, write: "None identified. This arrangement complies with Irish law on all major points."
 
 🟡 UNFAIR OR QUESTIONABLE CLAUSES:
-List clauses that are unusual, one-sided, or go beyond standard Irish leases — but are not illegal. If none, write: "No unusually unfair clauses identified."
+List clauses that are unusual, one-sided, or go beyond standard Irish arrangements. If none, write: "No unusually unfair clauses identified."
 
 🟢 STANDARD TERMS:
-List clauses that are normal and expected in Irish leases. Keep this brief — 3 to 5 bullet points maximum.
+List clauses that are normal and expected in Irish arrangements. Keep this brief — 3 to 5 bullet points maximum.
 
 [LAW] IRISH LAW EXPLANATION:
 - Use bullet points only, one point per law.
 - Maximum 4 bullet points.
 - One sentence per bullet.
 - Plain English only, no headers, no bold text.
-- Only reference laws that are directly relevant to THIS lease.
+- Only reference laws that are directly relevant to THIS arrangement. If Digs, explicitly mention licensee rules instead of standard RTB rules.
 
 [TODO] WHAT YOU SHOULD DO:
 - Give clear, specific, actionable advice based on what was actually found.
-- If the lease is largely fine, say so and give 2 to 3 simple steps.
+- If the lease/agreement is largely fine, say so and give 2 to 3 simple steps.
 - Use plain English.
 
 📊 RISK SCORE:
@@ -52,7 +63,7 @@ VERDICT: [SIGN / NEGOTIATE FIRST / WALK AWAY] — one sentence summary
 
 ---
 
-IRISH LAW FACTS — apply these precisely:
+IRISH LAW FACTS (Apply only if standard tenancy, NOT a Digs/Licensee arrangement):
 - Maximum deposit is ONE month's rent. Two months is illegal under the Residential Tenancies Act 2004.
 - In Rent Pressure Zones (Dublin, Cork, Galway city areas), rent increases are capped at 2% per year or CPI, whichever is lower.
 - Landlord must give minimum 24 hours written notice before entering. Not 12 hours — 24 hours.
@@ -75,7 +86,7 @@ IRISH LAW FACTS — apply these precisely:
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-       model: 'claude-haiku-4-5',
+        model: 'claude-haiku-4-5',
         max_tokens: 4000,
         system: SYSTEM_PROMPT,
         messages: [{ role: 'user', content: `Analyse this Irish lease:\n\n${leaseText}` }],
