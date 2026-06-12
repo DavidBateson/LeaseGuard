@@ -321,9 +321,10 @@ function ResultsScreen({ sections, isDemo, unlocked, activeTab, setActiveTab, on
   <a href="/privacy-policy" style={{ color: '#0066cc', textDecoration: 'underline' }}>Privacy Policy</a>
   <a href="/disclaimer" style={{ color: '#0066cc', textDecoration: 'underline' }}>Legal Disclaimer</a>
 </div>
-
-  );
+</div>
+);
 }
+
 
 function CriticalPreview({ text, onUnlock, paymentLoading }) {
   const truncated = getFirstBulletTruncated(text);
