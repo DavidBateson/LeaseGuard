@@ -310,16 +310,12 @@ function ResultsScreen({ sections, isDemo, unlocked, activeTab, setActiveTab, on
         </div>
       </div>
       <div style={s.tabContent}>
-        {activeTab === "critical" && (
-          unlocked
-            ? <ReportSection text={sections.critical} />
-            : <CriticalPreview text={sections.critical} onUnlock={onUnlock} paymentLoading={paymentLoading} />
-        )}
-        {activeTab !== "critical" && (
-          unlocked
-            ? <ReportSection text={sections[activeTab]} />
-            : <FullPaywall onUnlock={onUnlock} paymentLoading={paymentLoading} sectionName={tabs.find(t => t.id === activeTab)?.label} />
-        )}
+       {unlocked ? (
+  <ReportSection text={sections[activeTab]} />
+) : (
+  <FullPaywall onUnlock={onUnlock} paymentLoading={paymentLoading} sectionName={tabs.find(t => t.id === activeTab)?.label} />
+)}
+
       </div>
       <button style={s.resetBtn} onClick={onReset}>← Analyse another lease</button>
       <p style={s.disclaimer}>⚖️ LeaseGuard provides general information only, not legal advice. RTB: rtb.ie · Threshold: threshold.ie</p>
